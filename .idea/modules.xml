@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/Map4loud_0.2.iml" filepath="$PROJECT_DIR$/Map4loud_0.2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/httpclientandroidlib-1.2.1/httpclientandroidlib-1.2.1.iml" filepath="$PROJECT_DIR$/httpclientandroidlib-1.2.1/httpclientandroidlib-1.2.1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/org.json-20120521/org.json-20120521.iml" filepath="$PROJECT_DIR$/org.json-20120521/org.json-20120521.iml" />
+    </modules>
+  </component>
+</project>

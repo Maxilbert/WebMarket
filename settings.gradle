@@ -1,0 +1,1 @@
+include ':app', ':httpclientandroidlib-1.2.1', ':org.json-20120521'

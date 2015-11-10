@@ -1,0 +1,108 @@
+<com.sothree.slidinguppanel.SlidingUpPanelLayout
+    xmlns:sothree="http://schemas.android.com/apk/res-auto"
+    xmlns:roundbar="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/sliding_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="bottom"
+    sothree:umanoPanelHeight="0dp"
+    sothree:umanoShadowHeight="100dp"
+    sothree:umanoOverlay="true">
+
+    <LinearLayout
+        android:id="@+id/main"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:weightSum="1">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.03">
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Show Lden map"
+                android:id="@+id/checkLden"
+                android:checked="true"/>
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Show two-hour dBA map"
+                android:id="@+id/checkTwoHour"
+                android:checked="false"/>
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Show noise events"
+                android:id="@+id/checkEvent"
+                android:checked="true"/>
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Show permanent noise sources"
+                android:id="@+id/checkSource"
+                android:checked="true"/>
+        </LinearLayout>
+
+        <!--<com.google.android.gms.maps.MapView-->
+            <!--android:id="@+id/mapView"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="0.96"/>-->
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.97">
+            <fragment class="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/mapView"
+                android:layout_weight="0.96" />
+            <Button
+                android:layout_width="65dp"
+                android:layout_height="55dp"
+                android:background="@drawable/mic"
+                android:id="@+id/btnRecord"
+                android:layout_weight="0.01"
+                android:layout_gravity="center_horizontal|bottom" />
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:gravity="center|top"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:weightSum="1">
+
+        <Button
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:id="@+id/btnCollapse"
+            android:background="@drawable/arrow_down_01" />
+        
+        <com.example.yuan.views.RoundProgressBar
+            android:id="@+id/roundProgressBar"
+            android:visibility="visible"
+            android:layout_width="100dip"
+            android:layout_height="100dip"
+            android:layout_alignLeft="@+id/roundProgressBar1"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="50dip"
+
+            roundbar:roundColor="#BFBFBF"
+            roundbar:roundProgressColor="#454545"
+            roundbar:textColor="#454545"
+            roundbar:roundWidth="15dip"
+            roundbar:textSize="18sp"/>
+
+    </LinearLayout>
+
+</com.sothree.slidinguppanel.SlidingUpPanelLayout>

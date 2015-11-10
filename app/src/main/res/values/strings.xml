@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Map4loud</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="Username">Username</string>
+    <string name="Password">Password</string>
+    <string name="title_activity_register">Register</string>
+    <string name="title_activity_sound_map">SoundMap</string>
+    <string name="title_activity_maps">Map</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+
+</resources>
