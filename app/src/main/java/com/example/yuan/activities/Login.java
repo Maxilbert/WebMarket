@@ -165,8 +165,8 @@ public class Login extends AppCompatActivity {
             //noinspection deprecation
             //HttpClient httpClient = new DefaultHttpClient();
             CloseableHttpClient httpClient = HttpClients.createDefault();
-            String url = "https://web.njit.edu/~yl768/webapps7/Verify";
-            //String url = "https://web.njit.edu/~yl768/webapps7/Login.html";
+            //String url = "https://web.njit.edu/~yl768/webapps7/Verify";
+            String url = "http://128.235.40.165:8080/Verify";
             //第二步：生成使用POST方法的请求对象
             HttpPost httpPost = new HttpPost(url);
             //NameValuePair对象代表了一个需要发往服务器的键值对

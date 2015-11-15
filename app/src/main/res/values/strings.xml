@@ -9,6 +9,8 @@
     <string name="title_activity_sound_map">SoundMap</string>
     <string name="title_activity_maps">Map</string>
 
+    <string name="msg_mic_error">Microphone is not accessible</string>
+
 <!-- TODO: Remove or change this placeholder text -->
 
 </resources>
