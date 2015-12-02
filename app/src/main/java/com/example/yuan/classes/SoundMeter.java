@@ -26,7 +26,8 @@ import org.jtransforms.fft.DoubleFFT_1D;
  */
 public class SoundMeter implements Runnable{
 
-    public Handler mHandler;
+    public Handler mTotDecibelHandler;
+    public Handler mCurrentDecibelHandler;
     public double calibration = 4;
 
     private double decibel = 0;
@@ -36,9 +37,10 @@ public class SoundMeter implements Runnable{
     private int channelConfig = AudioFormat.CHANNEL_IN_MONO;
     private int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
 
-    public SoundMeter(Handler mHandler, double calibration){
+    public SoundMeter(Handler mTotDecibelHandler, Handler mCurrentDecibelHandler, double calibration){
         this.calibration = calibration;
-        this.mHandler = mHandler;
+        this.mTotDecibelHandler = mTotDecibelHandler;
+        this.mCurrentDecibelHandler = mCurrentDecibelHandler;
 
         //在这里我们创建一个文件，用于保存录制内容
         File fpath = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/com.example.yuan.classes/cache/");
@@ -57,6 +59,7 @@ public class SoundMeter implements Runnable{
     public void run() {
 
         isRecording = true;
+        int count = 0;
 
         try {
             //开通输出流到指定的文件
@@ -90,6 +93,7 @@ public class SoundMeter implements Runnable{
                     toTransform[i] = calibration * (double) buffer[i] / 32768.0;
                     dos.writeShort(buffer[i]);
                 }
+                count++;
                 new Thread(new Meter(bufferReadResult, toTransform, frequence)).start();
                 //
             }
@@ -104,10 +108,10 @@ public class SoundMeter implements Runnable{
 
         Message msg = new Message();
         Bundle data = new Bundle();
-        decibel = 10 * Math.log10(decibel);
+        decibel = 10 * Math.log10(decibel / count);
         data.putDouble("dBA", decibel);
         msg.setData(data);
-        mHandler.sendMessage(msg);
+        mTotDecibelHandler.sendMessage(msg);
 
     }
 
@@ -176,6 +180,13 @@ public class SoundMeter implements Runnable{
                 dBA += Math.pow(10, 0.1 * dB[i]);
             }
             dBA = 10 * Math.log10(dBA);
+
+            Message msg = new Message();
+            Bundle data = new Bundle();
+            data.putDouble("dBA", dBA);
+            msg.setData(data);
+            mCurrentDecibelHandler.sendMessage(msg);
+
             return dBA;
         }
 

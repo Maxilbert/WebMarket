@@ -83,11 +83,20 @@
         android:weightSum="1">
 
         <Button
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="65dp"
+            android:layout_height="50dp"
             android:id="@+id/btnCollapse"
             android:background="@drawable/arrow_down_01" />
-        
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="45sp"
+            android:text="0 dBA"
+            android:textSize="40sp"
+            android:textStyle="bold"
+            android:id="@+id/decibelView" />
+
         <com.example.yuan.views.RoundProgressBar
             android:id="@+id/roundProgressBar"
             android:visibility="visible"
@@ -95,7 +104,7 @@
             android:layout_height="100dip"
             android:layout_alignLeft="@+id/roundProgressBar1"
             android:layout_alignParentBottom="true"
-            android:layout_marginTop="50dip"
+            android:layout_marginTop="90dip"
 
             roundbar:roundColor="#BFBFBF"
             roundbar:roundProgressColor="#454545"

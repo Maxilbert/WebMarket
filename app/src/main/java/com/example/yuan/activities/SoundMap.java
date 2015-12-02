@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,6 +36,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.location.Location;
 
@@ -78,6 +80,7 @@ public class SoundMap extends FragmentActivity implements
         LocationListener {
 
     String name = null;
+    public double calibration = 4.0;
 
     //http://128.235.40.185:8080/MyWebAppTest/ReturnData
     private GoogleMap mMap;
@@ -97,6 +100,7 @@ public class SoundMap extends FragmentActivity implements
     private CheckBox mCheckSource;
     private Button mBtnExpand;
     private Button mBtnCollapse;
+    private TextView mDecibelView;
     private SlidingUpPanelLayout mSlidingLayout;
     private RoundProgressBar mRoundProgressBar;
     //
@@ -131,7 +135,6 @@ public class SoundMap extends FragmentActivity implements
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
-        updateLocation();
         setContentView(R.layout.activity_maps);
         init();
     }
@@ -150,6 +153,7 @@ public class SoundMap extends FragmentActivity implements
         mBtnExpand = (Button) findViewById(R.id.btnRecord);
         mBtnCollapse =  (Button) findViewById(R.id.btnCollapse);
         mRoundProgressBar = (RoundProgressBar) findViewById(R.id.roundProgressBar);
+        mDecibelView = (TextView) findViewById(R.id.decibelView);
 
         //Set default camera view of Google Map through programmtically generated mapView
         //GoogleMapOptions options = new GoogleMapOptions();
@@ -170,19 +174,7 @@ public class SoundMap extends FragmentActivity implements
         //mMap = mMapView.getMap();
         mMap = mMapFragment.getMap();
         mMap.setMyLocationEnabled(true);
-        if (40.65 < currentLatLon [0] && currentLatLon[0] < 40.95 && -74.25 < currentLatLon[1] && currentLatLon[1] < -73.85) {
-            CameraPosition newPosition = new CameraPosition(new LatLng(currentLatLon[0], currentLatLon[1]), 13, 0, (float) 0.0);
-            CameraUpdate update = CameraUpdateFactory.newCameraPosition(newPosition);
-            mMap.moveCamera(update);
-            uploadFlag = true;
-        }
-        else {
-//          if(lastLoc!=null)
-//                Toast.makeText(SoundMap.this, "You cannot upload noise data since your current location", Toast.LENGTH_LONG).show();
-            CameraPosition newPosition = new CameraPosition(new LatLng(40.80, -74.05), 13, 0, (float) 0.0);
-            CameraUpdate update = CameraUpdateFactory.newCameraPosition(newPosition);
-            mMap.moveCamera(update);
-        }
+
 
         //Set default UI of Google Map
         UiSettings us = mMap.getUiSettings();
@@ -201,6 +193,8 @@ public class SoundMap extends FragmentActivity implements
 
         //Draw the BOUNDS of monitoring area
         drawBounds();
+
+
 
         //Set listener for camera view change
         mMap.setOnCameraChangeListener(onCameraChangeListener);
@@ -239,11 +233,11 @@ public class SoundMap extends FragmentActivity implements
 
         //Sliding Up panel and its Listener
         mSlidingLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
-        mSlidingLayout.setAnchorPoint(0.45f);
+        mSlidingLayout.setAnchorPoint(0.65f);
         mSlidingLayout.setTouchEnabled(false);
-//        final String TAG = "onPanelSlide";
         mSlidingLayout.setPanelSlideListener(
             new SlidingUpPanelLayout.PanelSlideListener() {
+                //        final String TAG = "onPanelSlide";
                 @Override
                 public void onPanelSlide(View panel, float slideOffset) {
 //                        Log.i(TAG, "onPanelSlide, offset " + slideOffset);
@@ -276,6 +270,7 @@ public class SoundMap extends FragmentActivity implements
         mBtnCollapse.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mBtnExpand.setVisibility(View.VISIBLE);
                 mBtnCollapse.setClickable(false);
                 mBtnExpand.setClickable(true);
                 timer.cancel();
@@ -291,11 +286,10 @@ public class SoundMap extends FragmentActivity implements
             public void onClick(View v) {
                 mBtnCollapse.setClickable(false);
                 mBtnExpand.setClickable(false);
+                mBtnExpand.setVisibility(View.INVISIBLE);
                 updateLocation();
                 boolean flag = true;
                 double lat = currentLatLon[0], lon = currentLatLon[1];
-//                System.out.println("LAT: " + lat);
-//                System.out.println("LON: " + lon);
                 if (40.65 < lat && lat < 40.95 && -74.25 < lon && lon < -73.85) {
                     uploadFlag = true;
                 } else {
@@ -311,7 +305,7 @@ public class SoundMap extends FragmentActivity implements
 
                 //Start to record and analyze sound
 
-                new Thread(new SoundMeter(dBAHandler, 4.0)).start();
+                new Thread(new SoundMeter(mTotDecibelHandler, mCurrentDecibelHandler, calibration)).start();
 
                 //Set progress bar while record
                 mRoundProgressBar.setVisibility(View.VISIBLE);
@@ -336,9 +330,32 @@ public class SoundMap extends FragmentActivity implements
                 //Start to send data to server
             }
         });
+
     }
 
-
+    private void initCamera(){
+        for(int i = 0; i < 10; i++){
+            updateLocation();
+            if(currentLatLon [0] != 91)
+                break;
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if (40.65 < currentLatLon [0] && currentLatLon[0] < 40.95 && -74.25 < currentLatLon[1] && currentLatLon[1] < -73.85) {
+            CameraPosition newPosition = new CameraPosition(new LatLng(currentLatLon[0], currentLatLon[1]), 13, 0, (float) 0.0);
+            CameraUpdate update = CameraUpdateFactory.newCameraPosition(newPosition);
+            mMap.moveCamera(update);
+            uploadFlag = true;
+        }
+        else {
+            CameraPosition newPosition = new CameraPosition(new LatLng(40.80, -74.05), 13, 0, (float) 0.0);
+            CameraUpdate update = CameraUpdateFactory.newCameraPosition(newPosition);
+            mMap.moveCamera(update);
+        }
+    }
 
     private void updateLocation() {
         Location lastLoc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
@@ -352,13 +369,41 @@ public class SoundMap extends FragmentActivity implements
         checkLocation();
     }
 
-    Handler dBAHandler = new Handler(){
+    public void checkLocation() {
+        if (40.65 < currentLatLon [0] && currentLatLon[0] < 40.95 && -74.25 < currentLatLon[1] && currentLatLon[1] < -73.85) {
+            if((locationChangeCount)==0){
+                CameraPosition newPosition = new CameraPosition(new LatLng(currentLatLon[0], currentLatLon[1]), 13, 0, (float) 0.0);
+                CameraUpdate update = CameraUpdateFactory.newCameraPosition(newPosition);
+                mMap.moveCamera(update);
+                locationChangeCount++;
+            }
+            uploadFlag = true;
+        }
+        else {
+            //Toast.makeText(SoundMap.this, "You cannot upload noise data since your current location", Toast.LENGTH_LONG).show();
+            //CameraPosition newPosition = new CameraPosition(new LatLng(40.80, -74.05), 13, 0, (float) 0.0);
+            //CameraUpdate update = CameraUpdateFactory.newCameraPosition(newPosition);
+            //mMap.moveCamera(update);
+        }
+    }
+
+
+    Handler mTotDecibelHandler = new Handler(){
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             Bundle data = msg.getData();
             dBA = (float) data.getDouble("dBA");
             isRecordFinished = true;
             Toast.makeText(SoundMap.this, "Lat: " + currentLatLon[0] + ", Lon: " + currentLatLon[1] + ", dBA: " + dBA, Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    Handler mCurrentDecibelHandler = new Handler(){
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            Bundle data = msg.getData();
+            DecimalFormat df = new DecimalFormat("0.00");
+            mDecibelView.setText(df.format(data.getDouble("dBA")) + " dBA");
         }
     };
 
@@ -520,7 +565,7 @@ public class SoundMap extends FragmentActivity implements
     /**
      *
      */
-    Handler httpHandler = new Handler(){
+    Handler mHttpHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -605,13 +650,14 @@ public class SoundMap extends FragmentActivity implements
             } catch (UnsupportedEncodingException e1) {
                 e1.printStackTrace();
             } catch (IOException e2) {
+                Toast.makeText(SoundMap.this,"Cannot access server, please connect NJIT LAN or VPN.",Toast.LENGTH_LONG).show();
                 e2.printStackTrace();
             }
             Message msg = new Message();
             Bundle data = new Bundle();
             data.putString("soundData", result);
             msg.setData(data);
-            httpHandler.sendMessage(msg);
+            mHttpHandler.sendMessage(msg);
         }
     }
 
@@ -705,6 +751,7 @@ public class SoundMap extends FragmentActivity implements
             LocationServices.FusedLocationApi.requestLocationUpdates(
                     mGoogleApiClient, mLocationRequest, this);
         }
+        initCamera();
     }
 
     @Override
@@ -730,22 +777,5 @@ public class SoundMap extends FragmentActivity implements
         }
     }
 
-    public void checkLocation() {
-        if (40.65 < currentLatLon [0] && currentLatLon[0] < 40.95 && -74.25 < currentLatLon[1] && currentLatLon[1] < -73.85) {
-            if((locationChangeCount)==0){
-                CameraPosition newPosition = new CameraPosition(new LatLng(currentLatLon[0], currentLatLon[1]), 13, 0, (float) 0.0);
-                CameraUpdate update = CameraUpdateFactory.newCameraPosition(newPosition);
-                mMap.moveCamera(update);
-                locationChangeCount++;
-            }
-            uploadFlag = true;
-        }
-        else {
-            //Toast.makeText(SoundMap.this, "You cannot upload noise data since your current location", Toast.LENGTH_LONG).show();
-            //CameraPosition newPosition = new CameraPosition(new LatLng(40.80, -74.05), 13, 0, (float) 0.0);
-            //CameraUpdate update = CameraUpdateFactory.newCameraPosition(newPosition);
-            //mMap.moveCamera(update);
-        }
-    }
 
 }
