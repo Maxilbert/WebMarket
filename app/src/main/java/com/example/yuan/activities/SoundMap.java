@@ -20,13 +20,16 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -69,7 +72,8 @@ import ch.boye.httpclientandroidlib.impl.client.HttpClients;
 import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
 
 
-public class SoundMap extends FragmentActivity implements GoogleApiClient.ConnectionCallbacks,
+public class SoundMap extends FragmentActivity implements
+        GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
@@ -102,7 +106,7 @@ public class SoundMap extends FragmentActivity implements GoogleApiClient.Connec
     private double east, west, south, north;
 
     //
-    private final int GRID_DATA_CACHE_LIMIT = 2000;
+    private final int GRID_DATA_CACHE_LIMIT = 1500;
     private final LatLng SOUTHWEST = new LatLng(40.65, -74.25);
     private final LatLng SOUTHEAST = new LatLng(40.65, -73.85);
     private final LatLng NORTHEAST = new LatLng(40.95, -73.85);
@@ -115,19 +119,20 @@ public class SoundMap extends FragmentActivity implements GoogleApiClient.Connec
     private LocationRequest mLocationRequest;
     private int locationChangeCount = 0;
 
-    private float DB;
+    private float dBA;
     private boolean isRecordFinished = false;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
+        updateLocation();
+        setContentView(R.layout.activity_maps);
         init();
     }
 
@@ -136,12 +141,7 @@ public class SoundMap extends FragmentActivity implements GoogleApiClient.Connec
         //Get current username
         Intent intent = getIntent();
         name = intent.getStringExtra("username");
-        Location lastLoc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if(lastLoc!=null){
-            currentLatLon[0] = lastLoc.getLatitude();
-            currentLatLon[1] = lastLoc.getLongitude();
-        }
-
+        Thread soundMeter;
         //Initial checkboxes and button
         mCheckLden = (CheckBox) findViewById(R.id.checkLden);
         mCheckTwoHour = (CheckBox) findViewById(R.id.checkTwoHour);
@@ -177,8 +177,8 @@ public class SoundMap extends FragmentActivity implements GoogleApiClient.Connec
             uploadFlag = true;
         }
         else {
-            if(lastLoc!=null)
-                Toast.makeText(SoundMap.this, "You cannot upload noise data since your current location", Toast.LENGTH_LONG).show();
+//          if(lastLoc!=null)
+//                Toast.makeText(SoundMap.this, "You cannot upload noise data since your current location", Toast.LENGTH_LONG).show();
             CameraPosition newPosition = new CameraPosition(new LatLng(40.80, -74.05), 13, 0, (float) 0.0);
             CameraUpdate update = CameraUpdateFactory.newCameraPosition(newPosition);
             mMap.moveCamera(update);
@@ -241,7 +241,7 @@ public class SoundMap extends FragmentActivity implements GoogleApiClient.Connec
         mSlidingLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
         mSlidingLayout.setAnchorPoint(0.45f);
         mSlidingLayout.setTouchEnabled(false);
-        final String TAG = "onPanelSlide";
+//        final String TAG = "onPanelSlide";
         mSlidingLayout.setPanelSlideListener(
             new SlidingUpPanelLayout.PanelSlideListener() {
                 @Override
@@ -276,6 +276,8 @@ public class SoundMap extends FragmentActivity implements GoogleApiClient.Connec
         mBtnCollapse.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mBtnCollapse.setClickable(false);
+                mBtnExpand.setClickable(true);
                 timer.cancel();
                 mMap.getUiSettings().setScrollGesturesEnabled(true);
                 mRoundProgressBar.setProgress(0);
@@ -287,60 +289,76 @@ public class SoundMap extends FragmentActivity implements GoogleApiClient.Connec
         mBtnExpand.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mBtnCollapse.setClickable(false);
+                mBtnExpand.setClickable(false);
+                updateLocation();
                 boolean flag = true;
-                double lat, lon;
-                //double currentLatLon[] = getCurrentLatLon();
-                lat = currentLatLon[0];
-                lon = currentLatLon[1];
+                double lat = currentLatLon[0], lon = currentLatLon[1];
+//                System.out.println("LAT: " + lat);
+//                System.out.println("LON: " + lon);
                 if (40.65 < lat && lat < 40.95 && -74.25 < lon && lon < -73.85) {
                     uploadFlag = true;
                 } else {
+                    uploadFlag = false;
                     Toast.makeText(SoundMap.this,
                             "You cannot upload noise data since your current location",
                             Toast.LENGTH_LONG).show();
                     return;
                 }
+                uploadFlag = true;
                 mMap.getUiSettings().setScrollGesturesEnabled(false);
                 mSlidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
 
                 //Start to record and analyze sound
-                new Thread(new SoundMeter(getApplicationContext(), dBHandler)).start();
+
+                new Thread(new SoundMeter(dBAHandler, 4.0)).start();
 
                 //Set progress bar while record
                 mRoundProgressBar.setVisibility(View.VISIBLE);
-                if(timer!=null){
+                if (timer != null) {
                     timer.cancel();
                 }
                 timer = new Timer();
                 timer.schedule(new TimerTask() {
                     int progress = 0;
+
                     public void run() {
                         if (progress <= 100) {
                             mRoundProgressBar.setProgress(progress);
                             progress++;
                         } else {
                             //mRoundProgressBar.setVisibility(View.INVISIBLE);
+                            mBtnCollapse.setClickable(true);
                             timer.cancel();
                         }
                     }
                 }, 0, 1 * 100);
                 //Start to send data to server
-
             }
         });
     }
 
-    Handler dBHandler = new Handler(){
+
+
+    private void updateLocation() {
+        Location lastLoc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if(lastLoc != null){
+            currentLatLon[0] = lastLoc.getLatitude();
+            currentLatLon[1] = lastLoc.getLongitude();
+        } else {
+            //lastLoc is null;
+            System.out.println("Last location is null");
+        }
+        checkLocation();
+    }
+
+    Handler dBAHandler = new Handler(){
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             Bundle data = msg.getData();
-            String dBString = data.getString("DB");
-            if(dBString!=null)
-                DB = Float.parseFloat(dBString);
-            else
-                DB = 21;
+            dBA = (float) data.getDouble("dBA");
             isRecordFinished = true;
-            Toast.makeText(SoundMap.this, "Lat: " + currentLatLon[0] + ", Lon: " + currentLatLon[1] + ", DB: " + DB, Toast.LENGTH_SHORT).show();
+            Toast.makeText(SoundMap.this, "Lat: " + currentLatLon[0] + ", Lon: " + currentLatLon[1] + ", dBA: " + dBA, Toast.LENGTH_SHORT).show();
         }
     };
 
@@ -356,29 +374,29 @@ public class SoundMap extends FragmentActivity implements GoogleApiClient.Connec
                 public void onCameraChange(CameraPosition cameraPosition) {
                     boolean requestFlag = false;
                     //Limit area and zoom
-                    limitZoneAndZoom();
+                    //limitZoneAndZoom();
                     LatLngBounds visibleBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
                     //if zoom level is either 17 or 18;
                     //if zoom level is 14 or smaller, clear sound mask;
-                    if (mMap.getCameraPosition().zoom >= 13) {
+                    if (mMap.getCameraPosition().zoom >= 14) {
                         if (visibleBounds.southwest.latitude < south || visibleBounds.southwest.longitude < west) {
                             requestFlag = true;
                         }
                         if (visibleBounds.northeast.latitude > north || visibleBounds.northeast.longitude > east) {
                             requestFlag = true;
                         }
-                    } else if(mMap.getCameraPosition().zoom < 13) {
+                    } else if(mMap.getCameraPosition().zoom < 14) {
                         clearSoundMask();
                     }
                     if(gridDataCache.size() > GRID_DATA_CACHE_LIMIT){
                         clearSoundMask();
                     }
                     if (requestFlag){
-                        south = visibleBounds.southwest.latitude - 0.0009;//the boundry of sound mask
-                        north = visibleBounds.northeast.latitude + 0.0009;//the boundry of sound mask
-                        west = visibleBounds.southwest.longitude - 0.0012;//the boundry of sound mask
-                        east = visibleBounds.northeast.longitude + 0.0012;//the boundry of sound mask
-                        new Thread(RequestDataThread).start();
+                        south = visibleBounds.southwest.latitude - 0.009;//the boundry of sound mask
+                        north = visibleBounds.northeast.latitude + 0.009;//the boundry of sound mask
+                        west = visibleBounds.southwest.longitude - 0.012;//the boundry of sound mask
+                        east = visibleBounds.northeast.longitude + 0.012;//the boundry of sound mask
+                        new Thread(new RequestDataThread()).start();
                         //System.gc();
                     }
                 }
@@ -534,11 +552,8 @@ public class SoundMap extends FragmentActivity implements GoogleApiClient.Connec
                         gridDataCache.add(temp);
                     }
                 }
-                //datas.add(data);
             } catch (JSONException e) {
-                e.printStackTrace();
-                Toast.makeText(SoundMap.this, "Error: cannot connect server.",
-                        Toast.LENGTH_LONG).show();
+                return;
             }
             //Start process UI
             drawSoundMask();
@@ -550,7 +565,7 @@ public class SoundMap extends FragmentActivity implements GoogleApiClient.Connec
      * Get the sound map data within a rectangular zone
      * from servlet through Http post connection
      */
-    Runnable RequestDataThread = new Runnable(){
+    class RequestDataThread implements Runnable{
         @Override
         public void run() {
             // TODO: http post.
@@ -598,7 +613,7 @@ public class SoundMap extends FragmentActivity implements GoogleApiClient.Connec
             msg.setData(data);
             httpHandler.sendMessage(msg);
         }
-    };
+    }
 
 
 //    /**
@@ -640,9 +655,11 @@ public class SoundMap extends FragmentActivity implements GoogleApiClient.Connec
 
     @Override
     protected void onStart() {
-        super.onStart();
         // Connect the client.
-        mGoogleApiClient.connect();
+        super.onStart();
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.connect();
+        }
     }
 
     @Override
@@ -656,12 +673,17 @@ public class SoundMap extends FragmentActivity implements GoogleApiClient.Connec
     protected void onResume() {
         super.onResume();
         //mMapView.onResume();
+        mGoogleApiClient.connect();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         //mMapView.onPause();
+        if (mGoogleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+            mGoogleApiClient.disconnect();
+        }
     }
 
     @Override
@@ -672,13 +694,17 @@ public class SoundMap extends FragmentActivity implements GoogleApiClient.Connec
 
     @Override
     public void onConnected(Bundle bundle) {
-
-        mLocationRequest = LocationRequest.create();
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setInterval(1000); // Update location every second
-
-        LocationServices.FusedLocationApi.requestLocationUpdates(
-                mGoogleApiClient, mLocationRequest, this);
+        Log.i("SoundMap", "GoogleApiClient connected");
+        int permissionCheck = ContextCompat.checkSelfPermission(SoundMap.this,
+                Manifest.permission.WRITE_CALENDAR);
+        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            mLocationRequest = LocationRequest.create();
+            mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            mLocationRequest.setInterval(10*1000); // Update location every second
+            mLocationRequest.setFastestInterval(1*1000); // Update location every second
+            LocationServices.FusedLocationApi.requestLocationUpdates(
+                    mGoogleApiClient, mLocationRequest, this);
+        }
     }
 
     @Override
@@ -694,10 +720,14 @@ public class SoundMap extends FragmentActivity implements GoogleApiClient.Connec
     @Override
     public void onLocationChanged(Location location) {
         //获取Location
-        currentLatLon[0] = location.getLatitude();
-        currentLatLon[1] = location.getLongitude();
-        //Toast.makeText(SoundMap.this, "" + currentLatLon[0] + currentLatLon[1], Toast.LENGTH_SHORT).show();
-        checkLocation();
+        Log.i("SoundMap", "Location changed");
+        int permissionCheck = ContextCompat.checkSelfPermission(SoundMap.this, Manifest.permission.ACCESS_FINE_LOCATION);
+        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            currentLatLon[0] = location.getLatitude();
+            currentLatLon[1] = location.getLongitude();
+            //Toast.makeText(SoundMap.this, "" + currentLatLon[0] + currentLatLon[1], Toast.LENGTH_SHORT).show();
+            checkLocation();
+        }
     }
 
     public void checkLocation() {
@@ -711,7 +741,7 @@ public class SoundMap extends FragmentActivity implements GoogleApiClient.Connec
             uploadFlag = true;
         }
         else {
-            Toast.makeText(SoundMap.this, "You cannot upload noise data since your current location", Toast.LENGTH_LONG).show();
+            //Toast.makeText(SoundMap.this, "You cannot upload noise data since your current location", Toast.LENGTH_LONG).show();
             //CameraPosition newPosition = new CameraPosition(new LatLng(40.80, -74.05), 13, 0, (float) 0.0);
             //CameraUpdate update = CameraUpdateFactory.newCameraPosition(newPosition);
             //mMap.moveCamera(update);
