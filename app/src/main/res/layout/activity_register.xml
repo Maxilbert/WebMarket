@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
@@ -15,6 +15,18 @@
         android:layout_alignParentStart="true"
         android:weightSum="1">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Register View"
+            android:id="@+id/textView" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"/>
+
         <GridLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -24,56 +36,189 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Username:"
+                android:text="Email:"
                 android:layout_row="0"
                 android:layout_column="0"
-                android:height="55dp"
+                android:height="45dp"
                 android:textSize="15sp"/>
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:singleLine="true"
                 android:ems="10"
-                android:id="@+id/etName_1"
+                android:id="@+id/etEmail_1"
+                android:inputType="textEmailAddress"
                 android:layout_row="0"
                 android:layout_column="2"
-                android:height="55dp"
+                android:height="45dp"
+                android:textSize="15sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="First Name:"
+                android:layout_row="1"
+                android:layout_column="0"
+                android:height="45dp"
+                android:textSize="15sp"/>
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ems="10"
+                android:id="@+id/etName_1"
+                android:layout_row="1"
+                android:layout_column="2"
+                android:height="45dp"
+                android:textSize="15sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Last Name:"
+                android:layout_row="2"
+                android:layout_column="0"
+                android:height="45dp"
+                android:textSize="15sp"/>
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ems="10"
+                android:id="@+id/etName_2"
+                android:layout_row="2"
+                android:layout_column="2"
+                android:height="45dp"
+                android:textSize="15sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Street:"
+                android:layout_row="3"
+                android:layout_column="0"
+                android:height="45dp"
+                android:textSize="15sp" />
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ems="10"
+                android:id="@+id/etSt_1"
+                android:layout_row="3"
+                android:layout_column="2"
+                android:height="45dp"
+                android:textSize="15sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="City:"
+                android:layout_row="4"
+                android:layout_column="0"
+                android:height="45dp"
+                android:textSize="15sp" />
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ems="10"
+                android:id="@+id/etCity_1"
+                android:layout_row="4"
+                android:layout_column="2"
+                android:height="45dp"
+                android:textSize="15sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="State:"
+                android:layout_row="5"
+                android:layout_column="0"
+                android:height="45dp"
+                android:textSize="15sp" />
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ems="10"
+                android:id="@+id/etState_1"
+                android:layout_row="5"
+                android:layout_column="2"
+                android:height="45dp"
+                android:textSize="15sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ZIP code:"
+                android:layout_row="6"
+                android:layout_column="0"
+                android:height="45dp"
+                android:textSize="15sp" />
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ems="10"
+                android:id="@+id/etZIP_1"
+                android:numeric="integer"
+                android:layout_row="6"
+                android:layout_column="2"
+                android:height="45dp"
+                android:textSize="15sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Phone:"
+                android:layout_row="8"
+                android:layout_column="0"
+                android:height="45dp"
+                android:textSize="15sp" />
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ems="10"
+                android:id="@+id/etPhone_1"
+                android:inputType="phone"
+                android:layout_row="8"
+                android:layout_column="2"
+                android:height="45dp"
                 android:textSize="15sp"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Password:"
-                android:layout_row="2"
+                android:layout_row="9"
                 android:layout_column="0"
-                android:height="55dp"
+                android:height="45dp"
                 android:textSize="15sp"/>
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:singleLine="true"
                 android:inputType="textPassword"
                 android:ems="10"
                 android:id="@+id/etPwd_1"
-                android:layout_row="2"
+                android:layout_row="9"
                 android:layout_column="2"
-                android:height="55dp"
+                android:height="45dp"
                 android:textSize="15sp" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Confirm Password:"
-                android:layout_row="3"
+                android:layout_row="10"
                 android:layout_column="0"
-                android:height="55dp"
+                android:height="45dp"
                 android:textSize="15sp" />
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:singleLine="true"
                 android:inputType="textPassword"
                 android:ems="10"
                 android:id="@+id/etPwd_2"
-                android:layout_row="3"
+                android:layout_row="10"
                 android:layout_column="2"
-                android:height="55dp"
+                android:height="45dp"
                 android:textSize="15sp"/>
+
         </GridLayout>
 
         <LinearLayout
@@ -117,4 +262,4 @@
 
     </LinearLayout>
 
-</RelativeLayout>
+</ScrollView>

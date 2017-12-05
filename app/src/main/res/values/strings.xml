@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Map4loud</string>
+    <string name="app_name">WebMarket</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -10,6 +10,8 @@
     <string name="title_activity_maps">Map</string>
 
     <string name="msg_mic_error">Microphone is not accessible</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_manager">Manager</string>
 
 <!-- TODO: Remove or change this placeholder text -->
 

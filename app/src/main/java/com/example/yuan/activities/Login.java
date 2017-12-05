@@ -13,7 +13,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.yuan.map4loud.R;
+import com.example.yuan.webmarket.R;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -34,13 +34,15 @@ import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
  */
 public class Login extends AppCompatActivity {
 
+    private String url = "http://128.235.40.185:8080/MyWebAppTest/Verify";
+
     private Button mBtnLgn = null;
     private Button mBtnReg = null;
     private EditText mEtName = null;
     private EditText mEtPwd = null;
 
-    String name = null;
-    String pwd = null;
+    String email = null;
+    String password = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,19 +91,17 @@ public class Login extends AppCompatActivity {
         mBtnLgn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                name = mEtName.getText().toString();
-                pwd = mEtPwd.getText().toString();
-                if (name.equals("") || name == null) {
+                email = mEtName.getText().toString();
+                password = mEtPwd.getText().toString();
+                if (email.equals("") || email == null) {
                     Toast.makeText(Login.this, "Please input your username.",
                             Toast.LENGTH_SHORT).show();
                     return;
-                } else if (pwd.equals("") || pwd == null){
+                } else if (password.equals("") || password == null){
                     Toast.makeText(Login.this, "Please input your password.",
                             Toast.LENGTH_SHORT).show();
                     return;
                 } else {
-                    //String jsonStr = "{ \"username\": \"" + name + "\", \"password\":\"" + pwd + "\"}";
-                    //String url = "http://128.235.40.185:8080/MyWebAppTest/Verify";
                     new Thread(verifyThread).start();
                 }
             }
@@ -131,20 +131,20 @@ public class Login extends AppCompatActivity {
             //Toast.makeText(Login.this, "The result is " + val,
             //        Toast.LENGTH_LONG).show();
             if(val.equals("1")) {
-                Toast.makeText(Login.this, "Welcome back, " + name + "!",
+                Toast.makeText(Login.this, "Welcome back, " + email + "!",
                         Toast.LENGTH_LONG).show();
                 Intent intent = new Intent();
-                intent.setClass(Login.this, SoundMap.class);
+                intent.setClass(Login.this, MainActivity.class);
                 //Bundle bundle=new Bundle();
                 //bundle.putString("username", name);
                 //intent.putExtras(bundle);
-                intent.putExtra("username", name);
+                intent.putExtra("email", email);
                 Login.this.startActivity(intent);
                 //Clear password for security consideration
                 mEtPwd.setText(null, TextView.BufferType.EDITABLE);
-                pwd = null;
+                password = null;
             } else if (val.equals("0")){
-                Toast.makeText(Login.this, "Wrong username or/and password.",
+                Toast.makeText(Login.this, "Wrong email address or/and password.",
                         Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(Login.this, "Sorry. Fail to connect server. Please try later.",
@@ -165,12 +165,11 @@ public class Login extends AppCompatActivity {
             //HttpClient httpClient = new DefaultHttpClient();
             CloseableHttpClient httpClient = HttpClients.createDefault();
             //String url = "https://web.njit.edu/~yl768/webapps7/Verify";
-            String url = "http://128.235.40.165:8080/Verify";
             //第二步：生成使用POST方法的请求对象
             HttpPost httpPost = new HttpPost(url);
             //NameValuePair对象代表了一个需要发往服务器的键值对
-            NameValuePair pair1 = new BasicNameValuePair("username", name);
-            NameValuePair pair2 = new BasicNameValuePair("password", pwd);
+            NameValuePair pair1 = new BasicNameValuePair("email", email);
+            NameValuePair pair2 = new BasicNameValuePair("password", password);
             //将准备好的键值对对象放置在一个List当中
             ArrayList<NameValuePair> pairs = new ArrayList<>();
             pairs.add(pair1);
